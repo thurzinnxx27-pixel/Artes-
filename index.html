@@ -573,6 +573,12 @@ input, textarea { font-family: inherit; }
 .input:focus { border-color: var(--gold); background: var(--paper); box-shadow: 0 0 0 4px rgba(201,169,97,0.15); }
 .input::placeholder { color: #b8a99e; font-style: italic; }
 textarea.input { resize: vertical; }
+.input-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: -2px 0 6px 4px;
+}
 .admin-sub { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; color: var(--wine); margin: 24px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .admin-item {
   display: flex;
@@ -829,7 +835,8 @@ textarea.input { resize: vertical; }
       <div id="adminPanel" style="display:none;">
         <h4 class="admin-sub">Adicionar novo produto</h4>
         <input type="text" id="prodName" placeholder="Nome do produto" class="input">
-        <input type="number" id="prodPrice" placeholder="Preço (ex: 59.90)" step="0.01" class="input">
+        <input type="text" id="prodPrice" placeholder="Digite só números: 2000 = R$ 20,00" inputmode="numeric" class="input">
+        <p class="input-hint">💡 Digite só números. Ex: 2000 vira R$ 20,00 · 5990 vira R$ 59,90</p>
         <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
         <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="3"></textarea>
         <button id="addProductBtn" class="btn-block">Adicionar produto</button>
@@ -874,6 +881,26 @@ document.addEventListener('DOMContentLoaded', () => {
   atualizarContadorCarrinho();
   setupEventos();
 });
+
+// ==================== MÁSCARA DE PREÇO (estilo banco) ====================
+function formatarPrecoInput(e) {
+  let valor = e.target.value.replace(/\D/g, '');
+  if (!valor) {
+    e.target.value = '';
+    return;
+  }
+  valor = valor.padStart(3, '0');
+  const reais = valor.slice(0, -2);
+  const centavos = valor.slice(-2);
+  const reaisFormatado = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  e.target.value = `R$ ${reaisFormatado},${centavos}`;
+}
+
+function parsearPreco(valorFormatado) {
+  if (!valorFormatado) return NaN;
+  const limpo = valorFormatado.replace(/[R$\s.]/g, '').replace(',', '.');
+  return parseFloat(limpo);
+}
 
 // ==================== PRODUTOS ====================
 function renderProdutos() {
@@ -1011,7 +1038,7 @@ function salvarProdutos() {
 
 function adicionarProduto() {
   const nome = document.getElementById('prodName').value.trim();
-  const preco = parseFloat(document.getElementById('prodPrice').value);
+  const preco = parsearPreco(document.getElementById('prodPrice').value);
   const imagem = document.getElementById('prodImage').value.trim();
   const descricao = document.getElementById('prodDesc').value.trim();
 
@@ -1118,6 +1145,7 @@ function setupEventos() {
   });
 
   document.getElementById('addProductBtn').onclick = adicionarProduto;
+  document.getElementById('prodPrice').addEventListener('input', formatarPrecoInput);
 
   document.querySelectorAll('.modal').forEach(modal => {
     modal.onclick = (e) => { if (e.target === modal) fecharModal(modal.id); };
