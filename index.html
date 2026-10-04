@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ateliê Artesanal - Feito à Mão com Amor</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-content">
+      <div class="logo">
+        <span class="logo-icon">🧶</span>
+        <div>
+          <h1>Ateliê Artesanal</h1>
+          <p class="tagline">Feito à mão com amor</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#produtos">Produtos</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contato">Contato</a>
+        <button id="cartBtn" class="cart-btn">
+          🛒 <span id="cartCount">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-content">
+      <h2>Peças únicas, feitas com carinho</h2>
+      <p>Cada criação é exclusiva, produzida artesanalmente para trazer beleza e aconchego ao seu lar.</p>
+      <a href="#produtos" class="btn-primary">Ver Produtos</a>
+    </div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="produtos" class="section">
+    <div class="container">
+      <h2 class="section-title">Nossos Produtos</h2>
+      <p class="section-subtitle">Artesanato feito à mão, exclusivo para você</p>
+      <div id="produtosGrid" class="produtos-grid"></div>
+      <p id="semProdutos" class="sem-produtos">Nenhum produto cadastrado ainda. 🌸</p>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section id="sobre" class="section sobre">
+    <div class="container sobre-content">
+      <div class="sobre-text">
+        <h2>Nossa História</h2>
+        <p>Somos um ateliê dedicado ao artesanato feito à mão. Cada peça carrega uma história, um cuidado e um carinho especial. Trabalhamos com materiais selecionados e técnicas tradicionais para criar peças únicas que aquecem o coração.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section id="contato" class="section contato">
+    <div class="container">
+      <h2 class="section-title">Entre em Contato</h2>
+      <p class="section-subtitle">Dúvidas? Fale conosco!</p>
+      <div class="contato-info">
+        <p>📱 WhatsApp: <a href="https://wa.me/5500000000000" target="_blank">(00) 00000-0000</a></p>
+        <p>📷 Instagram: <a href="#" target="_blank">@atelieartesanal</a></p>
+        <p>✉️ Email: contato@atelieartesanal.com</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 Ateliê Artesanal. Feito com 🧡 à mão.</p>
+    </div>
+  </footer>
+
+  <!-- MODAL CARRINHO -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🛒 Seu Carrinho</h3>
+        <span class="close" id="closeCart">&times;</span>
+      </div>
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-total">
+        <strong>Total: <span id="cartTotal">R$ 0,00</span></strong>
+      </div>
+      <button id="checkoutBtn" class="btn-primary btn-full">Finalizar Pedido</button>
+    </div>
+  </div>
+
+  <!-- MODAL PAGAMENTO -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💳 Pagamento via PIX</h3>
+        <span class="close" id="closePayment">&times;</span>
+      </div>
+      <div class="payment-content">
+        <p class="payment-instrucao">Escaneie o QR Code abaixo com o app do seu banco para pagar:</p>
+        
+        <div class="qr-area" id="qrArea">
+          <img src="qrcode.png" alt="QR Code PIX para pagamento" class="qr-code-img">
+          <p class="qr-instrucao">📱 Abra o app do seu banco e escaneie o QR Code acima</p>
+        </div>
+
+        <div class="payment-info">
+          <p><strong>Valor:</strong> <span id="paymentValue">R$ 0,00</span></p>
+          <p><strong>Chave PIX:</strong> <span id="pixKey">a definir</span></p>
+        </div>
+
+        <button id="confirmPayment" class="btn-primary btn-full">✅ Já fiz o pagamento</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ADMIN -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3>⚙️ Painel Administrativo</h3>
+        <span class="close" id="closeAdmin">&times;</span>
+      </div>
+
+      <div id="loginSection">
+        <p>Digite a senha para acessar:</p>
+        <input type="password" id="adminPassword" placeholder="Senha" class="input">
+        <button id="loginBtn" class="btn-primary btn-full">Entrar</button>
+        <p id="loginError" class="error-msg"></p>
+      </div>
+
+      <div id="adminPanel" style="display:none;">
+        <h4>Adicionar Novo Produto</h4>
+        <input type="text" id="prodName" placeholder="Nome do produto" class="input">
+        <input type="number" id="prodPrice" placeholder="Preço (ex: 59.90)" step="0.01" class="input">
+        <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
+        <textarea id="prodDesc" placeholder="Descrição do produto" class="input" rows="3"></textarea>
+        <button id="addProductBtn" class="btn-primary btn-full">➕ Adicionar Produto</button>
+
+        <h4 style="margin-top:20px;">Produtos Cadastrados</h4>
+        <div id="adminList" class="admin-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão admin discreto -->
+  <button id="adminBtn" class="admin-btn" title="Admin">⚙️</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
