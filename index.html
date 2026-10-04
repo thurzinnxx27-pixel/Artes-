@@ -379,7 +379,7 @@ input, textarea { font-family: inherit; }
 .contato-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 12px 30px rgba(107,30,43,0.1); }
 .contato-card-icon { font-size: 1.8rem; margin-bottom: 12px; display: block; }
 .contato-card-label { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 6px; }
-.contato-card-value { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--wine); font-size: 1rem; }
+.contato-card-value { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--wine); font-size: 1rem; word-break: break-word; }
 
 /* FOOTER */
 .footer { background: var(--wine-dark); color: rgba(250,243,232,0.6); text-align: center; padding: 30px 20px; font-size: 0.85rem; letter-spacing: 1px; }
@@ -447,6 +447,37 @@ input, textarea { font-family: inherit; }
   line-height: 1;
 }
 .modal-close:hover { background: var(--cream-2); color: var(--wine); }
+
+/* TABS DO ADMIN */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--cream);
+  padding: 4px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+}
+.admin-tab {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-radius: 4px;
+  transition: all 0.25s;
+  text-align: center;
+}
+.admin-tab.active {
+  background: var(--wine);
+  color: var(--cream);
+}
+.admin-tab:hover:not(.active) { color: var(--wine); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
 /* CARRINHO */
 .cart-items { max-height: 320px; overflow-y: auto; margin-bottom: 8px; }
@@ -539,9 +570,9 @@ input, textarea { font-family: inherit; }
 .qr-area { background: var(--cream); border: 1px solid var(--line); border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 20px; }
 .qr-code-img { max-width: 260px; width: 100%; margin: 0 auto; border-radius: 6px; background: white; padding: 10px; border: 1px solid var(--line); }
 .payment-info { background: var(--cream-2); border-radius: 6px; padding: 16px 20px; margin-bottom: 8px; border: 1px dashed var(--line); }
-.payment-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-.payment-row span { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
-.payment-row strong { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink); font-weight: 700; }
+.payment-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; gap: 12px; }
+.payment-row span { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; white-space: nowrap; }
+.payment-row strong { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink); font-weight: 700; word-break: break-word; text-align: right; }
 .payment-row:first-child strong { color: var(--wine); font-size: 1.3rem; font-weight: 900; }
 
 .aviso-importante {
@@ -580,6 +611,7 @@ textarea.input { resize: vertical; }
   margin: -2px 0 6px 4px;
 }
 .admin-sub { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; color: var(--wine); margin: 24px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.admin-sub:first-child { margin-top: 0; }
 .admin-item {
   display: flex;
   justify-content: space-between;
@@ -605,6 +637,7 @@ textarea.input { resize: vertical; }
 }
 .admin-item button:hover { background: #c0392b; color: white; }
 .error-msg { color: #c0392b; font-size: 0.85rem; margin-top: 10px; text-align: center; }
+.success-msg { color: #4a8a3f; font-size: 0.85rem; margin-top: 10px; text-align: center; }
 
 .admin-btn {
   position: fixed;
@@ -644,6 +677,7 @@ textarea.input { resize: vertical; }
   .modal-head h3 { font-size: 1.2rem; }
   .contato-grid { grid-template-columns: 1fr; }
   .admin-btn { bottom: 16px; right: 16px; width: 48px; height: 48px; }
+  .admin-tab { font-size: 0.68rem; padding: 9px 6px; letter-spacing: 0.5px; }
 }
 </style>
 </head>
@@ -656,9 +690,9 @@ textarea.input { resize: vertical; }
 <header class="header">
   <div class="container header-inner">
     <a href="#" class="logo">
-      <div class="logo-seal">A</div>
+      <div class="logo-seal" id="logoSeal">A</div>
       <div class="logo-info">
-        <div class="logo-name">Ateliê Artesanal</div>
+        <div class="logo-name" id="logoNome">Ateliê Artesanal</div>
         <div class="logo-tag">feito à mão com amor</div>
       </div>
     </a>
@@ -734,20 +768,20 @@ textarea.input { resize: vertical; }
       <p class="section-sub">— encomendas, dúvidas ou só um oi —</p>
     </div>
     <div class="contato-grid">
-      <a href="https://wa.me/5500000000000" target="_blank" class="contato-card">
+      <a id="cardWhatsapp" href="#" target="_blank" class="contato-card">
         <span class="contato-card-icon">📱</span>
         <div class="contato-card-label">WhatsApp</div>
-        <div class="contato-card-value">(00) 00000-0000</div>
+        <div class="contato-card-value" id="cardWhatsappValor">(00) 00000-0000</div>
       </a>
-      <a href="#" target="_blank" class="contato-card">
+      <a id="cardInstagram" href="#" target="_blank" class="contato-card">
         <span class="contato-card-icon">📷</span>
         <div class="contato-card-label">Instagram</div>
-        <div class="contato-card-value">@atelieartesanal</div>
+        <div class="contato-card-value" id="cardInstagramValor">@atelieartesanal</div>
       </a>
-      <a href="mailto:contato@atelieartesanal.com" class="contato-card">
+      <a id="cardEmail" href="#" class="contato-card">
         <span class="contato-card-icon">✉️</span>
         <div class="contato-card-label">Email</div>
-        <div class="contato-card-value">contato@atelie…com</div>
+        <div class="contato-card-value" id="cardEmailValor">contato@atelie.com</div>
       </a>
     </div>
   </div>
@@ -755,7 +789,7 @@ textarea.input { resize: vertical; }
 
 <footer class="footer">
   <div class="footer-orn">✦ ✦ ✦</div>
-  <p>© 2025 Ateliê Artesanal — feito com 🧡 à mão</p>
+  <p>© 2025 <span id="footerNome">Ateliê Artesanal</span> — feito com 🧡 à mão</p>
 </footer>
 
 <!-- MODAL CARRINHO -->
@@ -826,22 +860,65 @@ textarea.input { resize: vertical; }
         <h3>Painel Administrativo</h3>
         <button class="modal-close" id="closeAdmin">×</button>
       </div>
+
       <div id="loginSection">
         <p class="admin-hint">Digite a senha para continuar</p>
         <input type="password" id="adminPassword" placeholder="Senha" class="input">
         <button id="loginBtn" class="btn-block">Entrar</button>
         <p id="loginError" class="error-msg"></p>
       </div>
+
       <div id="adminPanel" style="display:none;">
-        <h4 class="admin-sub">Adicionar novo produto</h4>
-        <input type="text" id="prodName" placeholder="Nome do produto" class="input">
-        <input type="text" id="prodPrice" placeholder="Digite só números: 2000 = R$ 20,00" inputmode="numeric" class="input">
-        <p class="input-hint">💡 Digite só números. Ex: 2000 vira R$ 20,00 · 5990 vira R$ 59,90</p>
-        <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
-        <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="3"></textarea>
-        <button id="addProductBtn" class="btn-block">Adicionar produto</button>
-        <h4 class="admin-sub">Produtos cadastrados</h4>
-        <div id="adminList"></div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="produtos">Produtos</button>
+          <button class="admin-tab" data-tab="config">Configurações</button>
+        </div>
+
+        <!-- ABA PRODUTOS -->
+        <div id="tab-produtos" class="tab-content active">
+          <h4 class="admin-sub">Adicionar novo produto</h4>
+          <input type="text" id="prodName" placeholder="Nome do produto" class="input">
+          <input type="text" id="prodPrice" placeholder="Digite só números: 2000 = R$ 20,00" inputmode="numeric" class="input">
+          <p class="input-hint">💡 Digite só números. Ex: 2000 vira R$ 20,00 · 5990 vira R$ 59,90</p>
+          <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
+          <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="3"></textarea>
+          <button id="addProductBtn" class="btn-block">Adicionar produto</button>
+
+          <h4 class="admin-sub">Produtos cadastrados</h4>
+          <div id="adminList"></div>
+        </div>
+
+        <!-- ABA CONFIGURAÇÕES -->
+        <div id="tab-config" class="tab-content">
+          <h4 class="admin-sub">Informações da Loja</h4>
+          <label class="input-hint" style="margin-top:8px;">Nome da loja</label>
+          <input type="text" id="cfgNomeLoja" placeholder="Ex: Ateliê da Maria" class="input">
+
+          <h4 class="admin-sub">Contato</h4>
+          <label class="input-hint" style="margin-top:8px;">WhatsApp (formato para exibir)</label>
+          <input type="text" id="cfgWhatsappExibir" placeholder="Ex: (11) 98765-4321" class="input">
+
+          <label class="input-hint" style="margin-top:8px;">WhatsApp (só números, com 55 e DDD)</label>
+          <input type="text" id="cfgWhatsappNumero" placeholder="Ex: 5511987654321" inputmode="numeric" class="input">
+          <p class="input-hint">💡 Começa com 55 (Brasil) + DDD + número. Sem espaços ou traços.</p>
+
+          <label class="input-hint" style="margin-top:8px;">Instagram (@ sem o @, só o nome)</label>
+          <input type="text" id="cfgInstagram" placeholder="Ex: ateliedamaria" class="input">
+
+          <label class="input-hint" style="margin-top:8px;">Email</label>
+          <input type="text" id="cfgEmail" placeholder="Ex: contato@atelie.com" class="input">
+
+          <h4 class="admin-sub">Pagamento</h4>
+          <label class="input-hint" style="margin-top:8px;">Chave PIX (para exibir)</label>
+          <input type="text" id="cfgPix" placeholder="Ex: 11987654321 ou email" class="input">
+
+          <h4 class="admin-sub">Segurança</h4>
+          <label class="input-hint" style="margin-top:8px;">Nova senha do admin (deixe vazio para não mudar)</label>
+          <input type="password" id="cfgSenha" placeholder="Nova senha" class="input">
+
+          <button id="saveConfigBtn" class="btn-block">💾 Salvar configurações</button>
+          <p id="configMsg" class="success-msg"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -855,40 +932,114 @@ textarea.input { resize: vertical; }
 </button>
 
 <script>
-// ==================== CONFIGURAÇÃO ====================
-// 🔒 TROQUE ESSA SENHA DO ADMIN
-const ADMIN_PASSWORD = "artesa2025";
-
-// 🔑 SUA CHAVE PIX (só para exibir, é opcional)
-const PIX_KEY = "a definir";
-
-// 📱 SEU WHATSAPP (com código do país e DDD, SÓ NÚMEROS)
-// Exemplo Brasil: 5511999999999
-const WHATSAPP_NUMBER = "5500000000000";
-
-// 🏷️ NOME DA SUA LOJA (aparece nas mensagens)
-const NOME_LOJA = "Ateliê Artesanal";
+// ==================== CONFIGURAÇÕES PADRÃO ====================
+// Estes valores só são usados na PRIMEIRA vez que o site abre.
+// Depois disso, tudo é salvo no navegador e editável pelo painel.
+const CONFIG_PADRAO = {
+  nomeLoja: "Ateliê Artesanal",
+  whatsappExibir: "(00) 00000-0000",
+  whatsappNumero: "5500000000000",
+  instagram: "atelieartesanal",
+  email: "contato@atelieartesanal.com",
+  pixKey: "a definir",
+  senha: "artesa2025"
+};
 
 // ==================== ESTADO ====================
+let config = JSON.parse(localStorage.getItem('config')) || { ...CONFIG_PADRAO };
 let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 let isAdmin = false;
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
+  aplicarConfig();
   renderProdutos();
   renderCarrinho();
   atualizarContadorCarrinho();
   setupEventos();
 });
 
-// ==================== MÁSCARA DE PREÇO (estilo banco) ====================
+// ==================== APLICAR CONFIG NA TELA ====================
+function aplicarConfig() {
+  // Nome da loja
+  document.getElementById('logoNome').textContent = config.nomeLoja;
+  document.getElementById('footerNome').textContent = config.nomeLoja;
+
+  // Primeira letra do logo
+  const inicial = (config.nomeLoja || 'A').trim().charAt(0).toUpperCase();
+  document.getElementById('logoSeal').textContent = inicial;
+
+  // WhatsApp card
+  const numeroLimpo = (config.whatsappNumero || '').replace(/\D/g, '');
+  document.getElementById('cardWhatsapp').href = `https://wa.me/${numeroLimpo}`;
+  document.getElementById('cardWhatsappValor').textContent = config.whatsappExibir;
+
+  // Instagram card
+  const insta = (config.instagram || '').replace('@', '');
+  document.getElementById('cardInstagram').href = `https://instagram.com/${insta}`;
+  document.getElementById('cardInstagramValor').textContent = `@${insta}`;
+
+  // Email card
+  document.getElementById('cardEmail').href = `mailto:${config.email}`;
+  document.getElementById('cardEmailValor').textContent = config.email;
+
+  // PIX
+  document.getElementById('pixKey').textContent = config.pixKey;
+
+  // Título da página
+  document.title = `${config.nomeLoja} — Feito à mão com amor`;
+}
+
+// ==================== SALVAR CONFIG ====================
+function salvarConfig() {
+  const nomeLoja = document.getElementById('cfgNomeLoja').value.trim();
+  const whatsappExibir = document.getElementById('cfgWhatsappExibir').value.trim();
+  const whatsappNumero = document.getElementById('cfgWhatsappNumero').value.replace(/\D/g, '');
+  const instagram = document.getElementById('cfgInstagram').value.trim().replace('@', '');
+  const email = document.getElementById('cfgEmail').value.trim();
+  const pixKey = document.getElementById('cfgPix').value.trim();
+  const novaSenha = document.getElementById('cfgSenha').value.trim();
+
+  if (!nomeLoja) { alert('O nome da loja não pode ficar vazio!'); return; }
+  if (!whatsappNumero) { alert('O número do WhatsApp é obrigatório!'); return; }
+
+  config = {
+    nomeLoja,
+    whatsappExibir,
+    whatsappNumero,
+    instagram,
+    email,
+    pixKey,
+    senha: novaSenha || config.senha
+  };
+
+  localStorage.setItem('config', JSON.stringify(config));
+  aplicarConfig();
+
+  const msg = document.getElementById('configMsg');
+  msg.textContent = '✅ Configurações salvas!';
+  setTimeout(() => { msg.textContent = ''; }, 3000);
+
+  // Limpar campo de senha
+  document.getElementById('cfgSenha').value = '';
+}
+
+// ==================== PREENCHER FORM DE CONFIG ====================
+function preencherFormConfig() {
+  document.getElementById('cfgNomeLoja').value = config.nomeLoja;
+  document.getElementById('cfgWhatsappExibir').value = config.whatsappExibir;
+  document.getElementById('cfgWhatsappNumero').value = config.whatsappNumero;
+  document.getElementById('cfgInstagram').value = config.instagram;
+  document.getElementById('cfgEmail').value = config.email;
+  document.getElementById('cfgPix').value = config.pixKey;
+  document.getElementById('cfgSenha').value = '';
+}
+
+// ==================== MÁSCARA DE PREÇO ====================
 function formatarPrecoInput(e) {
   let valor = e.target.value.replace(/\D/g, '');
-  if (!valor) {
-    e.target.value = '';
-    return;
-  }
+  if (!valor) { e.target.value = ''; return; }
   valor = valor.padStart(3, '0');
   const reais = valor.slice(0, -2);
   const centavos = valor.slice(-2);
@@ -1016,7 +1167,7 @@ function atualizarContadorCarrinho() {
 
 // ==================== WHATSAPP ====================
 function gerarMensagemWhatsApp() {
-  let msg = `Olá! Acabei de fazer um pedido no ${NOME_LOJA} e vou enviar o comprovante do PIX.%0A%0A`;
+  let msg = `Olá! Acabei de fazer um pedido no ${config.nomeLoja} e vou enviar o comprovante do PIX.%0A%0A`;
   msg += `*Pedido:*%0A`;
   carrinho.forEach(item => {
     msg += `• ${item.qtd}x ${item.nome} — R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}%0A`;
@@ -1028,7 +1179,8 @@ function gerarMensagemWhatsApp() {
 
 function atualizarLinkWhatsApp() {
   const msg = gerarMensagemWhatsApp();
-  document.getElementById('whatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+  const numero = (config.whatsappNumero || '').replace(/\D/g, '');
+  document.getElementById('whatsappBtn').href = `https://wa.me/${numero}?text=${msg}`;
 }
 
 // ==================== ADMIN ====================
@@ -1092,6 +1244,21 @@ function fecharModal(id) {
   document.body.style.overflow = '';
 }
 
+// ==================== TABS ADMIN ====================
+function setupTabs() {
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.onclick = () => {
+      const alvo = tab.dataset.tab;
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + alvo).classList.add('active');
+      if (alvo === 'config') preencherFormConfig();
+      if (alvo === 'produtos') renderAdminList();
+    };
+  });
+}
+
 // ==================== EVENTOS ====================
 function setupEventos() {
   document.getElementById('cartBtn').onclick = () => abrirModal('cartModal');
@@ -1101,7 +1268,7 @@ function setupEventos() {
     if (carrinho.length === 0) { alert('Seu carrinho está vazio!'); return; }
     fecharModal('cartModal');
     document.getElementById('paymentValue').textContent = `R$ ${calcularTotal().toFixed(2).replace('.', ',')}`;
-    document.getElementById('pixKey').textContent = PIX_KEY;
+    document.getElementById('pixKey').textContent = config.pixKey;
     atualizarLinkWhatsApp();
     abrirModal('paymentModal');
   };
@@ -1128,7 +1295,7 @@ function setupEventos() {
 
   document.getElementById('loginBtn').onclick = () => {
     const senha = document.getElementById('adminPassword').value;
-    if (senha === ADMIN_PASSWORD) {
+    if (senha === config.senha) {
       isAdmin = true;
       document.getElementById('loginSection').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'block';
@@ -1146,6 +1313,10 @@ function setupEventos() {
 
   document.getElementById('addProductBtn').onclick = adicionarProduto;
   document.getElementById('prodPrice').addEventListener('input', formatarPrecoInput);
+
+  document.getElementById('saveConfigBtn').onclick = salvarConfig;
+
+  setupTabs();
 
   document.querySelectorAll('.modal').forEach(modal => {
     modal.onclick = (e) => { if (e.target === modal) fecharModal(modal.id); };
