@@ -879,8 +879,7 @@ textarea.input { resize: vertical; }
         <div id="tab-produtos" class="tab-content active">
           <h4 class="admin-sub">Adicionar novo produto</h4>
           <input type="text" id="prodName" placeholder="Nome do produto" class="input">
-          <input type="text" id="prodPrice" placeholder="Digite só números: 2000 = R$ 20,00" inputmode="numeric" class="input">
-          <p class="input-hint">💡 Digite só números. Ex: 2000 vira R$ 20,00 · 5990 vira R$ 59,90</p>
+          <input type="number" id="prodPrice" placeholder="Preço (ex: 20 ou 59.90)" step="0.01" min="0" class="input">
           <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
           <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="3"></textarea>
           <button id="addProductBtn" class="btn-block">Adicionar produto</button>
@@ -1027,23 +1026,6 @@ function preencherFormConfig() {
   document.getElementById('cfgSenha').value = '';
 }
 
-// ==================== MÁSCARA DE PREÇO ====================
-function formatarPrecoInput(e) {
-  let valor = e.target.value.replace(/\D/g, '');
-  if (!valor) { e.target.value = ''; return; }
-  valor = valor.padStart(3, '0');
-  const reais = valor.slice(0, -2);
-  const centavos = valor.slice(-2);
-  const reaisFormatado = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  e.target.value = `R$ ${reaisFormatado},${centavos}`;
-}
-
-function parsearPreco(valorFormatado) {
-  if (!valorFormatado) return NaN;
-  const limpo = valorFormatado.replace(/[R$\s.]/g, '').replace(',', '.');
-  return parseFloat(limpo);
-}
-
 // ==================== PRODUTOS ====================
 function renderProdutos() {
   const grid = document.getElementById('produtosGrid');
@@ -1181,7 +1163,7 @@ function salvarProdutos() {
 
 function adicionarProduto() {
   const nome = document.getElementById('prodName').value.trim();
-  const preco = parsearPreco(document.getElementById('prodPrice').value);
+  const preco = parseFloat(document.getElementById('prodPrice').value);
   const imagem = document.getElementById('prodImage').value.trim();
   const descricao = document.getElementById('prodDesc').value.trim();
 
@@ -1303,7 +1285,6 @@ function setupEventos() {
   });
 
   document.getElementById('addProductBtn').onclick = adicionarProduto;
-  document.getElementById('prodPrice').addEventListener('input', formatarPrecoInput);
 
   document.getElementById('saveConfigBtn').onclick = salvarConfig;
 
