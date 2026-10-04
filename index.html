@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ateliê Artesanal — Feito à mão com amor</title>
+<title>Ateliê Gilceli — Feito à mão com amor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Dancing+Script:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -690,9 +690,9 @@ textarea.input { resize: vertical; }
 <header class="header">
   <div class="container header-inner">
     <a href="#" class="logo">
-      <div class="logo-seal" id="logoSeal">A</div>
+      <div class="logo-seal" id="logoSeal">G</div>
       <div class="logo-info">
-        <div class="logo-name" id="logoNome">Ateliê Artesanal</div>
+        <div class="logo-name" id="logoNome">Ateliê Gilceli</div>
         <div class="logo-tag">feito à mão com amor</div>
       </div>
     </a>
@@ -718,7 +718,7 @@ textarea.input { resize: vertical; }
       <span class="diamond">✦</span>
       <span class="line"></span>
     </div>
-    <div class="hero-script">bem-vindo ao nosso ateliê</div>
+    <div class="hero-script">bem-vindo ao ateliê da Gilceli</div>
     <h1 class="hero-title">Peças únicas,<br><em>feitas com as mãos</em><br>e com o coração.</h1>
     <p class="hero-sub">Cada criação é exclusiva, produzida artesanalmente em pequenos lotes para trazer beleza e aconchego ao seu lar.</p>
     <a href="#produtos" class="hero-btn">
@@ -756,7 +756,7 @@ textarea.input { resize: vertical; }
     <h2 class="section-title">Feito devagar, para durar muito.</h2>
     <p>Somos um ateliê dedicado ao artesanato feito à mão. Cada peça carrega uma história, um cuidado e um carinho especial.</p>
     <p>Trabalhamos com materiais selecionados e técnicas tradicionais para criar peças únicas que aquecem o coração e transformam ambientes.</p>
-    <div class="sobre-assinatura">— com carinho, Ateliê</div>
+    <div class="sobre-assinatura">— com carinho, Gilceli</div>
   </div>
 </section>
 
@@ -789,7 +789,7 @@ textarea.input { resize: vertical; }
 
 <footer class="footer">
   <div class="footer-orn">✦ ✦ ✦</div>
-  <p>© 2025 <span id="footerNome">Ateliê Artesanal</span> — feito com 🧡 à mão</p>
+  <p>© 2025 <span id="footerNome">Ateliê Gilceli</span> — feito com 🧡 à mão</p>
 </footer>
 
 <!-- MODAL CARRINHO -->
@@ -892,7 +892,7 @@ textarea.input { resize: vertical; }
         <div id="tab-config" class="tab-content">
           <h4 class="admin-sub">Informações da Loja</h4>
           <label class="input-hint" style="margin-top:8px;">Nome da loja</label>
-          <input type="text" id="cfgNomeLoja" placeholder="Ex: Ateliê da Maria" class="input">
+          <input type="text" id="cfgNomeLoja" placeholder="Ex: Ateliê Gilceli" class="input">
 
           <h4 class="admin-sub">Contato</h4>
           <label class="input-hint" style="margin-top:8px;">WhatsApp (formato para exibir)</label>
@@ -903,7 +903,7 @@ textarea.input { resize: vertical; }
           <p class="input-hint">💡 Começa com 55 (Brasil) + DDD + número. Sem espaços ou traços.</p>
 
           <label class="input-hint" style="margin-top:8px;">Instagram (@ sem o @, só o nome)</label>
-          <input type="text" id="cfgInstagram" placeholder="Ex: ateliedamaria" class="input">
+          <input type="text" id="cfgInstagram" placeholder="Ex: ateliergilceli" class="input">
 
           <label class="input-hint" style="margin-top:8px;">Email</label>
           <input type="text" id="cfgEmail" placeholder="Ex: contato@atelie.com" class="input">
@@ -933,14 +933,13 @@ textarea.input { resize: vertical; }
 
 <script>
 // ==================== CONFIGURAÇÕES PADRÃO ====================
-// Estes valores só são usados na PRIMEIRA vez que o site abre.
-// Depois disso, tudo é salvo no navegador e editável pelo painel.
+// Estes valores são usados na primeira vez. Depois são editáveis pelo painel.
 const CONFIG_PADRAO = {
-  nomeLoja: "Ateliê Artesanal",
+  nomeLoja: "Ateliê Gilceli",
   whatsappExibir: "(00) 00000-0000",
   whatsappNumero: "5500000000000",
-  instagram: "atelieartesanal",
-  email: "contato@atelieartesanal.com",
+  instagram: "ateliergilceli",
+  email: "contato@ateliegilceli.com",
   pixKey: "a definir",
   senha: "artesa2025"
 };
@@ -962,32 +961,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================== APLICAR CONFIG NA TELA ====================
 function aplicarConfig() {
-  // Nome da loja
   document.getElementById('logoNome').textContent = config.nomeLoja;
   document.getElementById('footerNome').textContent = config.nomeLoja;
 
-  // Primeira letra do logo
-  const inicial = (config.nomeLoja || 'A').trim().charAt(0).toUpperCase();
+  const inicial = (config.nomeLoja || 'G').trim().charAt(0).toUpperCase();
   document.getElementById('logoSeal').textContent = inicial;
 
-  // WhatsApp card
   const numeroLimpo = (config.whatsappNumero || '').replace(/\D/g, '');
   document.getElementById('cardWhatsapp').href = `https://wa.me/${numeroLimpo}`;
   document.getElementById('cardWhatsappValor').textContent = config.whatsappExibir;
 
-  // Instagram card
   const insta = (config.instagram || '').replace('@', '');
   document.getElementById('cardInstagram').href = `https://instagram.com/${insta}`;
   document.getElementById('cardInstagramValor').textContent = `@${insta}`;
 
-  // Email card
   document.getElementById('cardEmail').href = `mailto:${config.email}`;
   document.getElementById('cardEmailValor').textContent = config.email;
 
-  // PIX
   document.getElementById('pixKey').textContent = config.pixKey;
 
-  // Título da página
   document.title = `${config.nomeLoja} — Feito à mão com amor`;
 }
 
@@ -1021,7 +1013,6 @@ function salvarConfig() {
   msg.textContent = '✅ Configurações salvas!';
   setTimeout(() => { msg.textContent = ''; }, 3000);
 
-  // Limpar campo de senha
   document.getElementById('cfgSenha').value = '';
 }
 
