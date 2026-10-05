@@ -253,13 +253,14 @@ input, textarea { font-family: inherit; }
 }
 .btn-block:hover { background: transparent; color: var(--wine); }
 
-.btn-success {
-  width: 100%; padding: 16px; background: #4a8a3f; color: white; border-radius: 4px;
-  font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;
-  transition: all 0.3s; margin-top: 10px; display: flex; align-items: center; justify-content: center;
-  gap: 10px; border: 2px solid #4a8a3f;
+.btn-publish {
+  width: 100%; padding: 18px; background: linear-gradient(135deg, #4a8a3f, #357a2c); color: white;
+  border-radius: 4px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.85rem;
+  transition: all 0.3s; margin-top: 20px; display: flex; align-items: center; justify-content: center;
+  gap: 10px; border: none; box-shadow: 0 4px 14px rgba(74,138,63,0.3);
 }
-.btn-success:hover { background: transparent; color: #4a8a3f; }
+.btn-publish:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(74,138,63,0.4); }
+.btn-publish:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-whatsapp {
   width: 100%; padding: 16px; background: var(--green); color: white; border-radius: 4px;
@@ -292,7 +293,7 @@ input, textarea { font-family: inherit; }
 }
 .input:focus { border-color: var(--gold); background: var(--paper); box-shadow: 0 0 0 4px rgba(201,169,97,0.15); }
 .input::placeholder { color: #b8a99e; font-style: italic; }
-textarea.input { resize: vertical; font-size: 0.8rem; font-family: monospace; }
+textarea.input { resize: vertical; font-family: inherit; }
 .admin-sub { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; color: var(--wine); margin: 24px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .admin-sub:first-child { margin-top: 0; }
 .admin-item {
@@ -307,6 +308,13 @@ textarea.input { resize: vertical; font-size: 0.8rem; font-family: monospace; }
 .admin-item button:hover { background: #c0392b; color: white; }
 .error-msg { color: #c0392b; font-size: 0.85rem; margin-top: 10px; text-align: center; }
 .success-msg { color: #4a8a3f; font-size: 0.85rem; margin-top: 10px; text-align: center; line-height: 1.5; }
+.info-msg { color: #8a7565; font-size: 0.82rem; margin-top: 10px; text-align: center; line-height: 1.5; font-style: italic; }
+
+.config-box {
+  background: var(--cream); border: 1px dashed var(--gold); border-radius: 6px;
+  padding: 16px; margin-bottom: 20px;
+}
+.config-box.hidden { display: none; }
 
 .admin-btn {
   position: fixed; bottom: 24px; right: 24px; width: 54px; height: 54px; border-radius: 50%;
@@ -486,24 +494,36 @@ textarea.input { resize: vertical; font-size: 0.8rem; font-family: monospace; }
       </div>
 
       <div id="adminPanel" style="display:none;">
+
+        <div id="configSection" class="config-box hidden">
+          <h4 class="admin-sub" style="margin-top:0;">⚙️ Configurar publicação (só uma vez)</h4>
+          <p class="info-msg" style="text-align:left;margin:0 0 10px 0;">
+            Cole aqui o token do GitHub. Depois é só clicar em "Publicar no site" que as mudanças vão pro ar automaticamente.
+          </p>
+          <input type="password" id="githubToken" placeholder="Cole o token aqui (github_pat_...)" class="input">
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button id="saveTokenBtn" class="btn-block" style="margin:0;flex:1;">💾 Salvar token</button>
+            <button id="testTokenBtn" class="btn-block" style="margin:0;flex:1;">🧪 Testar</button>
+          </div>
+          <p id="tokenMsg" class="success-msg"></p>
+        </div>
+
         <h4 class="admin-sub">Adicionar novo produto</h4>
         <input type="text" id="prodName" placeholder="Nome do produto" class="input">
         <input type="number" id="prodPrice" placeholder="Preço (ex: 25 ou 25.50)" step="0.01" min="0" class="input">
         <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
-        <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="2" style="font-family:inherit;"></textarea>
+        <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="2"></textarea>
         <button id="addProductBtn" class="btn-block">➕ Adicionar produto</button>
 
         <h4 class="admin-sub">Produtos cadastrados</h4>
         <div id="adminList"></div>
 
-        <h4 class="admin-sub">📤 Publicar no site</h4>
-        <p class="admin-hint" style="font-size:0.82rem;line-height:1.5;">
-          Clique no botão abaixo, copie o texto, e cole no <code>index.html</code> no lugar onde está <code>const PRODUTOS = [</code>.
+        <button id="publishBtn" class="btn-publish">📤 Publicar no site</button>
+        <p id="publishMsg" class="info-msg"></p>
+
+        <p style="text-align:center;margin-top:20px;font-size:0.8rem;">
+          <a href="#" id="toggleConfigLink" style="color:var(--muted);text-decoration:underline;">⚙️ Configurações avançadas</a>
         </p>
-        <button id="gerarCodigoBtn" class="btn-success">📋 Gerar código para publicar</button>
-        <textarea id="codigoGerado" class="input" rows="8" readonly placeholder="O código vai aparecer aqui..." style="margin-top:12px;"></textarea>
-        <button id="copiarCodigoBtn" class="btn-success" style="display:none;">✅ Copiar código</button>
-        <p id="publicarMsg" class="success-msg"></p>
       </div>
     </div>
   </div>
@@ -518,7 +538,7 @@ textarea.input { resize: vertical; font-size: 0.8rem; font-family: monospace; }
 
 <script>
 // =====================================================
-// ⚙️ CONFIGURAÇÕES FIXAS (não precisa mexer em nada aqui)
+// ⚙️ CONFIGURAÇÕES FIXAS
 // =====================================================
 const CONFIG = {
   nomeLoja: "Ateliê Gilceli Artes e Artesanato",
@@ -531,7 +551,14 @@ const CONFIG = {
 };
 
 // =====================================================
-// 🛍️ PRODUTOS PUBLICADOS (aqui é onde você cola o código gerado)
+// 🐙 DADOS DO REPOSITÓRIO GITHUB
+// =====================================================
+const REPO_OWNER = "thurzinnxx27-pixel";
+const REPO_NAME = "Gilceli";
+const REPO_FILE = "index.html";
+
+// =====================================================
+// 🛍️ PRODUTOS PUBLICADOS (o site atualiza essa lista automaticamente)
 // =====================================================
 const PRODUTOS_PUBLICADOS = [];
 
@@ -540,7 +567,7 @@ let produtos = [];
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 let isAdmin = false;
 
-// Tenta pegar do localStorage (se o admin já salvou algo), senão usa o publicado
+// Tenta pegar produtos salvos localmente (admin), senão usa publicados
 const _localProdutos = localStorage.getItem('produtos_admin');
 if (_localProdutos) {
   try { produtos = JSON.parse(_localProdutos); } catch(_) {}
@@ -672,7 +699,7 @@ function atualizarLinkWhatsApp() {
   document.getElementById('whatsappBtn').href = `https://wa.me/${CONFIG.whatsappNumero}?text=${msg}`;
 }
 
-// ==================== ADMIN ====================
+// ==================== ADMIN — PRODUTOS ====================
 function salvarProdutosAdmin() {
   localStorage.setItem('produtos_admin', JSON.stringify(produtos));
 }
@@ -698,8 +725,8 @@ function adicionarProduto() {
   document.getElementById('prodImage').value = '';
   document.getElementById('prodDesc').value = '';
 
-  document.getElementById('publicarMsg').textContent = '⚠️ Não esqueça: clique em "Gerar código" abaixo para publicar no site!';
-  document.getElementById('publicarMsg').style.color = '#c9a961';
+  document.getElementById('publishMsg').textContent = '⚠️ Clique em "Publicar no site" abaixo para atualizar o site.';
+  document.getElementById('publishMsg').style.color = '#c9a961';
 }
 
 function removerProduto(id) {
@@ -708,8 +735,8 @@ function removerProduto(id) {
   salvarProdutosAdmin();
   renderProdutos();
   renderAdminList();
-  document.getElementById('publicarMsg').textContent = '⚠️ Não esqueça: clique em "Gerar código" abaixo para atualizar o site!';
-  document.getElementById('publicarMsg').style.color = '#c9a961';
+  document.getElementById('publishMsg').textContent = '⚠️ Clique em "Publicar no site" para atualizar o site.';
+  document.getElementById('publishMsg').style.color = '#c9a961';
 }
 
 function renderAdminList() {
@@ -726,32 +753,140 @@ function renderAdminList() {
   `).join('');
 }
 
-function gerarCodigo() {
-  const codigo = `const PRODUTOS_PUBLICADOS = ${JSON.stringify(produtos, null, 2)};`;
-  document.getElementById('codigoGerado').value = codigo;
-  document.getElementById('copiarCodigoBtn').style.display = 'flex';
-  const msg = document.getElementById('publicarMsg');
-  msg.textContent = '✅ Código gerado! Clique em "Copiar código" abaixo.';
+// ==================== TOKEN DO GITHUB ====================
+function salvarToken() {
+  const token = document.getElementById('githubToken').value.trim();
+  if (!token) { alert('Cole o token primeiro!'); return; }
+  if (!token.startsWith('github_pat_') && !token.startsWith('ghp_')) {
+    alert('Esse não parece ser um token válido do GitHub. Ele deve começar com "github_pat_" ou "ghp_".');
+    return;
+  }
+  localStorage.setItem('github_token', token);
+  const msg = document.getElementById('tokenMsg');
+  msg.textContent = '✅ Token salvo! Agora clique em "Testar" pra confirmar.';
   msg.style.color = '#4a8a3f';
 }
 
-function copiarCodigo() {
-  const txt = document.getElementById('codigoGerado');
-  txt.select();
-  txt.setSelectionRange(0, 99999);
+async function testarToken() {
+  const token = localStorage.getItem('github_token');
+  const msg = document.getElementById('tokenMsg');
+  if (!token) { msg.textContent = '⚠️ Salve um token primeiro.'; msg.style.color = '#c0392b'; return; }
+  msg.textContent = '⏳ Testando...';
+  msg.style.color = '#8a7565';
   try {
-    document.execCommand('copy');
-    const msg = document.getElementById('publicarMsg');
-    msg.textContent = '✅ Copiado! Cole no index.html no lugar de "const PRODUTOS_PUBLICADOS = [];"';
-    msg.style.color = '#4a8a3f';
-  } catch(e) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(txt.value).then(() => {
-        const msg = document.getElementById('publicarMsg');
-        msg.textContent = '✅ Copiado! Cole no index.html no lugar de "const PRODUTOS_PUBLICADOS = [];"';
-        msg.style.color = '#4a8a3f';
-      });
+    const resp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+    if (resp.ok) {
+      msg.textContent = '✅ Tudo certo! O token está funcionando.';
+      msg.style.color = '#4a8a3f';
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      msg.textContent = `❌ Erro: ${err.message || resp.status}. Verifique se o token tem permissão de "Contents: Read and write" e se o repositório selecionado é o "${REPO_NAME}".`;
+      msg.style.color = '#c0392b';
     }
+  } catch (e) {
+    msg.textContent = '❌ Erro de conexão. Verifique sua internet.';
+    msg.style.color = '#c0392b';
+  }
+}
+
+// ==================== PUBLICAR NO GITHUB ====================
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+function base64ToUtf8(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+async function publicarNoSite() {
+  const btn = document.getElementById('publishBtn');
+  const msg = document.getElementById('publishMsg');
+  const token = localStorage.getItem('github_token');
+
+  if (!token) {
+    msg.textContent = '⚠️ Primeiro configure o token em "Configurações avançadas" abaixo.';
+    msg.style.color = '#c0392b';
+    document.getElementById('configSection').classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Publicando...';
+  msg.textContent = '⏳ Enviando para o GitHub...';
+  msg.style.color = '#8a7565';
+
+  try {
+    // 1. Buscar arquivo atual
+    const getResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+
+    if (!getResp.ok) {
+      const err = await getResp.json().catch(() => ({}));
+      throw new Error(err.message || 'Erro ao buscar arquivo. Verifique se o token tem permissão no repositório "' + REPO_NAME + '".');
+    }
+
+    const data = await getResp.json();
+    const sha = data.sha;
+    const conteudoAtual = base64ToUtf8(data.content.replace(/\n/g, ''));
+
+    // 2. Substituir o array PRODUTOS_PUBLICADOS
+    const regex = /const PRODUTOS_PUBLICADOS\s*=\s*\[[\s\S]*?\];/;
+    if (!regex.test(conteudoAtual)) {
+      throw new Error('Não encontrei a variável PRODUTOS_PUBLICADOS no arquivo. Certifique-se de usar a versão mais recente do index.html.');
+    }
+
+    const produtosJSON = JSON.stringify(produtos, null, 2);
+    const novoArray = `const PRODUTOS_PUBLICADOS = ${produtosJSON};`;
+    const novoConteudo = conteudoAtual.replace(regex, novoArray);
+
+    // 3. Enviar arquivo atualizado
+    const putResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Atualizar produtos (${produtos.length} ${produtos.length === 1 ? 'item' : 'itens'})`,
+        content: utf8ToBase64(novoConteudo),
+        sha: sha
+      })
+    });
+
+    if (!putResp.ok) {
+      const err = await putResp.json().catch(() => ({}));
+      throw new Error(err.message || 'Erro ao salvar');
+    }
+
+    msg.textContent = '✅ Publicado! Em 1-2 minutos o site estará atualizado para todos.';
+    msg.style.color = '#4a8a3f';
+    alert('✅ Produtos publicados com sucesso!\n\nEm 1-2 minutos o site estará atualizado para todas as pessoas que visitarem.');
+  } catch (e) {
+    msg.textContent = `❌ Erro: ${e.message}`;
+    msg.style.color = '#c0392b';
+    alert(`Erro ao publicar:\n\n${e.message}\n\nVerifique:\n• Se o token está correto\n• Se o token tem permissão "Contents: Read and write"\n• Se o repositório "${REPO_NAME}" foi selecionado no token\n• Se você tem internet`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📤 Publicar no site';
   }
 }
 
@@ -792,9 +927,12 @@ function setupEventos() {
       document.getElementById('loginSection').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'block';
       renderAdminList();
+      const tokenSalvo = localStorage.getItem('github_token');
+      if (tokenSalvo) document.getElementById('githubToken').value = tokenSalvo;
     }
   };
   document.getElementById('closeAdmin').onclick = () => fecharModal('adminModal');
+
   document.getElementById('loginBtn').onclick = () => {
     const senha = document.getElementById('adminPassword').value;
     if (senha === CONFIG.senhaAdmin) {
@@ -804,6 +942,8 @@ function setupEventos() {
       document.getElementById('loginError').textContent = '';
       document.getElementById('adminPassword').value = '';
       renderAdminList();
+      const tokenSalvo = localStorage.getItem('github_token');
+      if (tokenSalvo) document.getElementById('githubToken').value = tokenSalvo;
     } else {
       document.getElementById('loginError').textContent = 'Senha incorreta';
     }
@@ -813,8 +953,14 @@ function setupEventos() {
   });
 
   document.getElementById('addProductBtn').onclick = adicionarProduto;
-  document.getElementById('gerarCodigoBtn').onclick = gerarCodigo;
-  document.getElementById('copiarCodigoBtn').onclick = copiarCodigo;
+  document.getElementById('publishBtn').onclick = publicarNoSite;
+  document.getElementById('saveTokenBtn').onclick = salvarToken;
+  document.getElementById('testTokenBtn').onclick = testarToken;
+
+  document.getElementById('toggleConfigLink').onclick = (e) => {
+    e.preventDefault();
+    document.getElementById('configSection').classList.toggle('hidden');
+  };
 
   document.querySelectorAll('.modal').forEach(modal => {
     modal.onclick = (e) => { if (e.target === modal) fecharModal(modal.id); };
