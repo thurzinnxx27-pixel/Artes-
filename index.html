@@ -657,6 +657,34 @@ textarea.input { resize: vertical; }
 }
 .admin-btn:hover { background: var(--wine-dark); transform: rotate(90deg) scale(1.08); }
 
+/* LOADING */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
+  gap: 16px;
+  transition: opacity 0.4s;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--line);
+  border-top-color: var(--wine);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.3rem;
+  color: var(--wine);
+}
+
 /* RESPONSIVO */
 @media (max-width: 900px) { .nav { display: none; } }
 @media (max-width: 700px) {
@@ -682,6 +710,11 @@ textarea.input { resize: vertical; }
 </style>
 </head>
 <body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">carregando o ateliê...</div>
+</div>
 
 <div class="top-bar">
   <span>✦</span> Feito à mão · Enviamos para todo o Brasil <span>✦</span>
@@ -875,7 +908,6 @@ textarea.input { resize: vertical; }
           <button class="admin-tab" data-tab="config">Configurações</button>
         </div>
 
-        <!-- ABA PRODUTOS -->
         <div id="tab-produtos" class="tab-content active">
           <h4 class="admin-sub">Adicionar novo produto</h4>
           <input type="text" id="prodName" placeholder="Nome do produto" class="input">
@@ -888,7 +920,6 @@ textarea.input { resize: vertical; }
           <div id="adminList"></div>
         </div>
 
-        <!-- ABA CONFIGURAÇÕES -->
         <div id="tab-config" class="tab-content">
           <h4 class="admin-sub">Informações da Loja</h4>
           <label class="input-hint" style="margin-top:8px;">Nome da loja</label>
@@ -932,6 +963,12 @@ textarea.input { resize: vertical; }
 </button>
 
 <script>
+// =====================================================
+// ✅ ID DO JSONBLOB (NUVEM) — JÁ CONFIGURADO
+// =====================================================
+const JSONBLOB_ID = "01a10979-decc-72d3-bcd9-f1882cc42243";
+const JSONBLOB_URL = `https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`;
+
 // ==================== CONFIGURAÇÕES PADRÃO ====================
 const CONFIG_PADRAO = {
   nomeLoja: "Ateliê Gilceli Artes e Artesanato",
@@ -943,19 +980,66 @@ const CONFIG_PADRAO = {
   senha: "artesa2025"
 };
 
-// ==================== ESTADO ====================
-let config = JSON.parse(localStorage.getItem('config')) || { ...CONFIG_PADRAO };
-let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+let config = { ...CONFIG_PADRAO };
+let produtos = [];
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 let isAdmin = false;
 
+// ==================== CARREGAR DADOS DO SERVIDOR ====================
+async function carregarDados() {
+  try {
+    const res = await fetch(JSONBLOB_URL);
+    if (!res.ok) throw new Error('Erro ao carregar');
+    const dados = await res.json();
+    if (Array.isArray(dados.produtos)) produtos = dados.produtos;
+    if (dados.config && typeof dados.config === 'object') {
+      config = { ...CONFIG_PADRAO, ...dados.config };
+    }
+  } catch (e) {
+    console.log('Usando dados locais:', e);
+    const localConfig = localStorage.getItem('config');
+    const localProdutos = localStorage.getItem('produtos');
+    if (localConfig) {
+      try { config = { ...CONFIG_PADRAO, ...JSON.parse(localConfig) }; } catch(_) {}
+    }
+    if (localProdutos) {
+      try { produtos = JSON.parse(localProdutos); } catch(_) {}
+    }
+  }
+}
+
+// ==================== SALVAR DADOS NO SERVIDOR ====================
+async function salvarDados() {
+  // Backup local
+  localStorage.setItem('config', JSON.stringify(config));
+  localStorage.setItem('produtos', JSON.stringify(produtos));
+
+  try {
+    const res = await fetch(JSONBLOB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produtos, config })
+    });
+    if (!res.ok) throw new Error('Erro HTTP: ' + res.status);
+    return true;
+  } catch (e) {
+    console.error('Erro ao salvar:', e);
+    return false;
+  }
+}
+
 // ==================== INICIALIZAÇÃO ====================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await carregarDados();
   aplicarConfig();
   renderProdutos();
   renderCarrinho();
   atualizarContadorCarrinho();
   setupEventos();
+
+  const loading = document.getElementById('loadingOverlay');
+  loading.classList.add('hidden');
+  setTimeout(() => { loading.style.display = 'none'; }, 500);
 });
 
 // ==================== APLICAR CONFIG NA TELA ====================
@@ -983,7 +1067,7 @@ function aplicarConfig() {
 }
 
 // ==================== SALVAR CONFIG ====================
-function salvarConfig() {
+async function salvarConfig() {
   const nomeLoja = document.getElementById('cfgNomeLoja').value.trim();
   const whatsappExibir = document.getElementById('cfgWhatsappExibir').value.trim();
   const whatsappNumero = document.getElementById('cfgWhatsappNumero').value.replace(/\D/g, '');
@@ -996,22 +1080,26 @@ function salvarConfig() {
   if (!whatsappNumero) { alert('O número do WhatsApp é obrigatório!'); return; }
 
   config = {
-    nomeLoja,
-    whatsappExibir,
-    whatsappNumero,
-    instagram,
-    email,
-    pixKey,
+    nomeLoja, whatsappExibir, whatsappNumero, instagram, email, pixKey,
     senha: novaSenha || config.senha
   };
 
-  localStorage.setItem('config', JSON.stringify(config));
+  const msg = document.getElementById('configMsg');
+  msg.textContent = '⏳ Salvando...';
+  msg.style.color = '#8a7565';
+
+  const ok = await salvarDados();
   aplicarConfig();
 
-  const msg = document.getElementById('configMsg');
-  msg.textContent = '✅ Configurações salvas!';
-  setTimeout(() => { msg.textContent = ''; }, 3000);
+  if (ok) {
+    msg.textContent = '✅ Configurações salvas! Já está visível para todos.';
+    msg.style.color = '#4a8a3f';
+  } else {
+    msg.textContent = '⚠️ Salvo no seu aparelho, mas não consegui enviar para a nuvem. Verifique a internet.';
+    msg.style.color = '#c0392b';
+  }
 
+  setTimeout(() => { msg.textContent = ''; }, 5000);
   document.getElementById('cfgSenha').value = '';
 }
 
@@ -1157,11 +1245,7 @@ function atualizarLinkWhatsApp() {
 }
 
 // ==================== ADMIN ====================
-function salvarProdutos() {
-  localStorage.setItem('produtos', JSON.stringify(produtos));
-}
-
-function adicionarProduto() {
+async function adicionarProduto() {
   const nome = document.getElementById('prodName').value.trim();
   const preco = parseFloat(document.getElementById('prodPrice').value);
   const imagem = document.getElementById('prodImage').value.trim();
@@ -1173,7 +1257,8 @@ function adicionarProduto() {
   }
 
   produtos.push({ id: Date.now(), nome, preco, imagem, descricao });
-  salvarProdutos();
+
+  const ok = await salvarDados();
   renderProdutos();
   renderAdminList();
 
@@ -1182,15 +1267,22 @@ function adicionarProduto() {
   document.getElementById('prodImage').value = '';
   document.getElementById('prodDesc').value = '';
 
-  alert('✅ Produto adicionado!');
+  if (ok) {
+    alert('✅ Produto adicionado! Já está visível para todos.');
+  } else {
+    alert('⚠️ Produto adicionado no seu aparelho, mas não consegui enviar para a nuvem.\nVerifique sua internet e tente novamente.');
+  }
 }
 
-function removerProduto(id) {
+async function removerProduto(id) {
   if (!confirm('Deseja remover este produto?')) return;
   produtos = produtos.filter(p => p.id !== id);
-  salvarProdutos();
+  const ok = await salvarDados();
   renderProdutos();
   renderAdminList();
+  if (!ok) {
+    alert('⚠️ Removido do seu aparelho, mas não consegui atualizar na nuvem. Verifique a internet.');
+  }
 }
 
 function renderAdminList() {
@@ -1285,7 +1377,6 @@ function setupEventos() {
   });
 
   document.getElementById('addProductBtn').onclick = adicionarProduto;
-
   document.getElementById('saveConfigBtn').onclick = salvarConfig;
 
   setupTabs();
