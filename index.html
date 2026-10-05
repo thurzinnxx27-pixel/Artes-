@@ -212,6 +212,7 @@ input, textarea { font-family: inherit; }
   content: ''; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
   border: 1px solid var(--line); border-radius: 4px; pointer-events: none;
 }
+.modal-large { max-width: 580px; }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .modal-inner { position: relative; z-index: 1; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
@@ -252,6 +253,14 @@ input, textarea { font-family: inherit; }
 }
 .btn-block:hover { background: transparent; color: var(--wine); }
 
+.btn-success {
+  width: 100%; padding: 16px; background: #4a8a3f; color: white; border-radius: 4px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;
+  transition: all 0.3s; margin-top: 10px; display: flex; align-items: center; justify-content: center;
+  gap: 10px; border: 2px solid #4a8a3f;
+}
+.btn-success:hover { background: transparent; color: #4a8a3f; }
+
 .btn-whatsapp {
   width: 100%; padding: 16px; background: var(--green); color: white; border-radius: 4px;
   font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-size: 0.8rem;
@@ -275,6 +284,37 @@ input, textarea { font-family: inherit; }
 }
 .aviso-importante strong { color: var(--wine); }
 
+.admin-hint { color: var(--muted); font-size: 0.9rem; margin-bottom: 10px; font-style: italic; }
+.input {
+  width: 100%; padding: 13px 16px; margin: 6px 0; border: 1px solid var(--line);
+  border-radius: 4px; font-size: 0.92rem; color: var(--ink); background: var(--cream);
+  outline: none; transition: all 0.25s;
+}
+.input:focus { border-color: var(--gold); background: var(--paper); box-shadow: 0 0 0 4px rgba(201,169,97,0.15); }
+.input::placeholder { color: #b8a99e; font-style: italic; }
+textarea.input { resize: vertical; font-size: 0.8rem; font-family: monospace; }
+.admin-sub { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; color: var(--wine); margin: 24px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.admin-sub:first-child { margin-top: 0; }
+.admin-item {
+  display: flex; justify-content: space-between; align-items: center; padding: 12px 14px;
+  background: var(--cream); border-radius: 4px; margin-bottom: 8px; gap: 12px; border: 1px solid var(--line);
+}
+.admin-item span { font-size: 0.88rem; }
+.admin-item button {
+  color: #c0392b; border: 1px solid rgba(192,57,43,0.3); padding: 5px 12px; border-radius: 4px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+}
+.admin-item button:hover { background: #c0392b; color: white; }
+.error-msg { color: #c0392b; font-size: 0.85rem; margin-top: 10px; text-align: center; }
+.success-msg { color: #4a8a3f; font-size: 0.85rem; margin-top: 10px; text-align: center; line-height: 1.5; }
+
+.admin-btn {
+  position: fixed; bottom: 24px; right: 24px; width: 54px; height: 54px; border-radius: 50%;
+  background: var(--wine); color: var(--gold); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(107,30,43,0.35); z-index: 500; transition: all 0.3s; border: 2px solid var(--gold);
+}
+.admin-btn:hover { background: var(--wine-dark); transform: rotate(90deg) scale(1.08); }
+
 @media (max-width: 900px) { .nav { display: none; } }
 @media (max-width: 700px) {
   .header-inner { padding: 14px 18px; }
@@ -293,6 +333,7 @@ input, textarea { font-family: inherit; }
   .modal-content { padding: 24px 22px; }
   .modal-head h3 { font-size: 1.2rem; }
   .contato-grid { grid-template-columns: 1fr; }
+  .admin-btn { bottom: 16px; right: 16px; width: 48px; height: 48px; }
 }
 </style>
 </head>
@@ -432,31 +473,80 @@ input, textarea { font-family: inherit; }
   </div>
 </div>
 
+<div id="adminModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="modal-inner">
+      <div class="modal-head"><h3>Painel de Produtos</h3><button class="modal-close" id="closeAdmin">×</button></div>
+
+      <div id="loginSection">
+        <p class="admin-hint">Digite a senha para continuar</p>
+        <input type="password" id="adminPassword" placeholder="Senha" class="input">
+        <button id="loginBtn" class="btn-block">Entrar</button>
+        <p id="loginError" class="error-msg"></p>
+      </div>
+
+      <div id="adminPanel" style="display:none;">
+        <h4 class="admin-sub">Adicionar novo produto</h4>
+        <input type="text" id="prodName" placeholder="Nome do produto" class="input">
+        <input type="number" id="prodPrice" placeholder="Preço (ex: 25 ou 25.50)" step="0.01" min="0" class="input">
+        <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
+        <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="2" style="font-family:inherit;"></textarea>
+        <button id="addProductBtn" class="btn-block">➕ Adicionar produto</button>
+
+        <h4 class="admin-sub">Produtos cadastrados</h4>
+        <div id="adminList"></div>
+
+        <h4 class="admin-sub">📤 Publicar no site</h4>
+        <p class="admin-hint" style="font-size:0.82rem;line-height:1.5;">
+          Clique no botão abaixo, copie o texto, e cole no <code>index.html</code> no lugar onde está <code>const PRODUTOS = [</code>.
+        </p>
+        <button id="gerarCodigoBtn" class="btn-success">📋 Gerar código para publicar</button>
+        <textarea id="codigoGerado" class="input" rows="8" readonly placeholder="O código vai aparecer aqui..." style="margin-top:12px;"></textarea>
+        <button id="copiarCodigoBtn" class="btn-success" style="display:none;">✅ Copiar código</button>
+        <p id="publicarMsg" class="success-msg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="adminBtn" class="admin-btn" title="Painel admin">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+  </svg>
+</button>
+
 <script>
 // =====================================================
-// 🛍️ PRODUTOS — Para adicionar um novo, copie uma linha
-// inteira (com as chaves { }) e cole na linha de baixo,
-// mudando apenas nome, preço e descrição.
-// =====================================================
-const PRODUTOS = [
-  // { nome: "Colar de miçangas", preco: 25, descricao: "Feito à mão com muito carinho" },
-  // { nome: "Pulseira colorida", preco: 15, descricao: "Colorida e delicada" },
-];
-
-// =====================================================
-// ⚙️ CONFIGURAÇÕES FIXAS (não precisa mexer)
+// ⚙️ CONFIGURAÇÕES FIXAS (não precisa mexer em nada aqui)
 // =====================================================
 const CONFIG = {
   nomeLoja: "Ateliê Gilceli Artes e Artesanato",
   whatsappExibir: "(41) 98745-7979",
   whatsappNumero: "5541987457979",
   instagram: "gilcelickeski",
-  email: "Gilcelicheski@outlook.com"
+  email: "Gilcelicheski@outlook.com",
+  pixKey: "5541987457979",
+  senhaAdmin: "gilceli2025"
 };
 
+// =====================================================
+// 🛍️ PRODUTOS PUBLICADOS (aqui é onde você cola o código gerado)
+// =====================================================
+const PRODUTOS_PUBLICADOS = [];
+
 // ==================== ESTADO ====================
-let produtos = PRODUTOS.map((p, i) => ({ id: i + 1, ...p, imagem: p.imagem || '' }));
+let produtos = [];
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+let isAdmin = false;
+
+// Tenta pegar do localStorage (se o admin já salvou algo), senão usa o publicado
+const _localProdutos = localStorage.getItem('produtos_admin');
+if (_localProdutos) {
+  try { produtos = JSON.parse(_localProdutos); } catch(_) {}
+} else {
+  produtos = [...PRODUTOS_PUBLICADOS];
+}
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -466,6 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventos();
 });
 
+// ==================== PRODUTOS ====================
 function renderProdutos() {
   const grid = document.getElementById('produtosGrid');
   const semProdutos = document.getElementById('semProdutos');
@@ -496,6 +587,7 @@ function renderProdutos() {
   `).join('');
 }
 
+// ==================== CARRINHO ====================
 function addAoCarrinho(id) {
   const produto = produtos.find(p => p.id === id);
   if (!produto) return;
@@ -568,6 +660,7 @@ function atualizarContadorCarrinho() {
   document.getElementById('cartCount').textContent = carrinho.reduce((s, i) => s + i.qtd, 0);
 }
 
+// ==================== WHATSAPP ====================
 function atualizarLinkWhatsApp() {
   let msg = `Olá! Acabei de fazer um pedido no ${CONFIG.nomeLoja} e vou enviar o comprovante do PIX.%0A%0A`;
   msg += `*Pedido:*%0A`;
@@ -579,6 +672,90 @@ function atualizarLinkWhatsApp() {
   document.getElementById('whatsappBtn').href = `https://wa.me/${CONFIG.whatsappNumero}?text=${msg}`;
 }
 
+// ==================== ADMIN ====================
+function salvarProdutosAdmin() {
+  localStorage.setItem('produtos_admin', JSON.stringify(produtos));
+}
+
+function adicionarProduto() {
+  const nome = document.getElementById('prodName').value.trim();
+  const preco = parseFloat(document.getElementById('prodPrice').value);
+  const imagem = document.getElementById('prodImage').value.trim();
+  const descricao = document.getElementById('prodDesc').value.trim();
+
+  if (!nome || isNaN(preco) || preco <= 0) {
+    alert('Preencha o nome e um preço válido!');
+    return;
+  }
+
+  produtos.push({ id: Date.now(), nome, preco, imagem, descricao });
+  salvarProdutosAdmin();
+  renderProdutos();
+  renderAdminList();
+
+  document.getElementById('prodName').value = '';
+  document.getElementById('prodPrice').value = '';
+  document.getElementById('prodImage').value = '';
+  document.getElementById('prodDesc').value = '';
+
+  document.getElementById('publicarMsg').textContent = '⚠️ Não esqueça: clique em "Gerar código" abaixo para publicar no site!';
+  document.getElementById('publicarMsg').style.color = '#c9a961';
+}
+
+function removerProduto(id) {
+  if (!confirm('Deseja remover este produto?')) return;
+  produtos = produtos.filter(p => p.id !== id);
+  salvarProdutosAdmin();
+  renderProdutos();
+  renderAdminList();
+  document.getElementById('publicarMsg').textContent = '⚠️ Não esqueça: clique em "Gerar código" abaixo para atualizar o site!';
+  document.getElementById('publicarMsg').style.color = '#c9a961';
+}
+
+function renderAdminList() {
+  const list = document.getElementById('adminList');
+  if (produtos.length === 0) {
+    list.innerHTML = '<p style="color:#8a7565;text-align:center;font-size:0.9rem;font-style:italic;">Nenhum produto cadastrado.</p>';
+    return;
+  }
+  list.innerHTML = produtos.map(p => `
+    <div class="admin-item">
+      <span><strong>${p.nome}</strong> — R$ ${parseFloat(p.preco).toFixed(2).replace('.', ',')}</span>
+      <button onclick="removerProduto(${p.id})">Remover</button>
+    </div>
+  `).join('');
+}
+
+function gerarCodigo() {
+  const codigo = `const PRODUTOS_PUBLICADOS = ${JSON.stringify(produtos, null, 2)};`;
+  document.getElementById('codigoGerado').value = codigo;
+  document.getElementById('copiarCodigoBtn').style.display = 'flex';
+  const msg = document.getElementById('publicarMsg');
+  msg.textContent = '✅ Código gerado! Clique em "Copiar código" abaixo.';
+  msg.style.color = '#4a8a3f';
+}
+
+function copiarCodigo() {
+  const txt = document.getElementById('codigoGerado');
+  txt.select();
+  txt.setSelectionRange(0, 99999);
+  try {
+    document.execCommand('copy');
+    const msg = document.getElementById('publicarMsg');
+    msg.textContent = '✅ Copiado! Cole no index.html no lugar de "const PRODUTOS_PUBLICADOS = [];"';
+    msg.style.color = '#4a8a3f';
+  } catch(e) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt.value).then(() => {
+        const msg = document.getElementById('publicarMsg');
+        msg.textContent = '✅ Copiado! Cole no index.html no lugar de "const PRODUTOS_PUBLICADOS = [];"';
+        msg.style.color = '#4a8a3f';
+      });
+    }
+  }
+}
+
+// ==================== MODAIS ====================
 function abrirModal(id) {
   document.getElementById(id).classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -588,6 +765,7 @@ function fecharModal(id) {
   document.body.style.overflow = '';
 }
 
+// ==================== EVENTOS ====================
 function setupEventos() {
   document.getElementById('cartBtn').onclick = () => abrirModal('cartModal');
   document.getElementById('closeCart').onclick = () => fecharModal('cartModal');
@@ -607,6 +785,37 @@ function setupEventos() {
     atualizarContadorCarrinho();
     fecharModal('paymentModal');
   };
+
+  document.getElementById('adminBtn').onclick = () => {
+    abrirModal('adminModal');
+    if (isAdmin) {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      renderAdminList();
+    }
+  };
+  document.getElementById('closeAdmin').onclick = () => fecharModal('adminModal');
+  document.getElementById('loginBtn').onclick = () => {
+    const senha = document.getElementById('adminPassword').value;
+    if (senha === CONFIG.senhaAdmin) {
+      isAdmin = true;
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      document.getElementById('loginError').textContent = '';
+      document.getElementById('adminPassword').value = '';
+      renderAdminList();
+    } else {
+      document.getElementById('loginError').textContent = 'Senha incorreta';
+    }
+  };
+  document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  document.getElementById('addProductBtn').onclick = adicionarProduto;
+  document.getElementById('gerarCodigoBtn').onclick = gerarCodigo;
+  document.getElementById('copiarCodigoBtn').onclick = copiarCodigo;
+
   document.querySelectorAll('.modal').forEach(modal => {
     modal.onclick = (e) => { if (e.target === modal) fecharModal(modal.id); };
   });
@@ -615,6 +824,7 @@ function setupEventos() {
 window.addAoCarrinho = addAoCarrinho;
 window.alterarQtd = alterarQtd;
 window.removerDoCarrinho = removerDoCarrinho;
+window.removerProduto = removerProduto;
 </script>
 </body>
 </html>
