@@ -964,9 +964,9 @@ textarea.input { resize: vertical; }
 
 <script>
 // =====================================================
-// ✅ ID DO JSONBLOB (NUVEM) — JÁ CONFIGURADO
+// ✅ ID DO JSONBLOB (NUVEM) — CORRIGIDO
 // =====================================================
-const JSONBLOB_ID = "01a10979-decc-72d3-bcd9-f1882cc42243";
+const JSONBLOB_ID = "01a10981-5126-748a-9c17-64fa71f6516b";
 const JSONBLOB_URL = `https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`;
 
 // ==================== CONFIGURAÇÕES PADRÃO ====================
@@ -1010,7 +1010,6 @@ async function carregarDados() {
 
 // ==================== SALVAR DADOS NO SERVIDOR ====================
 async function salvarDados() {
-  // Backup local
   localStorage.setItem('config', JSON.stringify(config));
   localStorage.setItem('produtos', JSON.stringify(produtos));
 
