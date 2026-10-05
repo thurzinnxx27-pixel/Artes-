@@ -139,6 +139,12 @@ input, textarea { font-family: inherit; }
   width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
   border: 3px solid var(--gold); flex-shrink: 0; background: var(--cream-2);
   box-shadow: 0 4px 12px rgba(42,24,16,0.12);
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.menu-item-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(107,30,43,0.3);
 }
 .menu-item-img-placeholder {
   width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold);
@@ -222,6 +228,50 @@ input, textarea { font-family: inherit; }
   display: flex; align-items: center; justify-content: center; transition: all 0.25s; line-height: 1;
 }
 .modal-close:hover { background: var(--cream-2); color: var(--wine); }
+
+/* LIGHTBOX (imagem ampliada) */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(42,24,16,0.95);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  cursor: zoom-out;
+}
+.lightbox.active { display: flex; }
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: zoomIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 3px solid var(--gold);
+}
+@keyframes zoomIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(250,243,232,0.1);
+  color: var(--cream);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--gold);
+  transition: all 0.25s;
+  line-height: 1;
+}
+.lightbox-close:hover { background: var(--wine); color: var(--cream); }
 
 .cart-items { max-height: 320px; overflow-y: auto; margin-bottom: 8px; }
 .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dashed var(--line); gap: 12px; }
@@ -393,7 +443,7 @@ textarea.input { resize: vertical; font-family: inherit; }
     <div class="section-head">
       <div class="section-script">nossa coleção</div>
       <h2 class="section-title">Criações do Ateliê</h2>
-      <p class="section-sub">— selecionadas uma a uma, feitas para durar —</p>
+      <p class="section-sub">— clique na foto para ver melhor —</p>
     </div>
     <div id="produtosGrid" class="menu-grid"></div>
     <div id="semProdutos" class="empty-state">
@@ -428,15 +478,15 @@ textarea.input { resize: vertical; font-family: inherit; }
         <div class="contato-card-label">WhatsApp</div>
         <div class="contato-card-value">(41) 98745-7979</div>
       </a>
-      <a href="https://instagram.com/gilcelickeski" target="_blank" class="contato-card">
+      <a href="https://instagram.com/gilcelicheslak" target="_blank" class="contato-card">
         <span class="contato-card-icon">📷</span>
         <div class="contato-card-label">Instagram</div>
-        <div class="contato-card-value">@gilcelickeski</div>
+        <div class="contato-card-value">@gilcelicheslak</div>
       </a>
-      <a href="mailto:Gilcelicheski@outlook.com" class="contato-card">
+      <a href="mailto:Gilcelicheslak@outlook.com" class="contato-card">
         <span class="contato-card-icon">✉️</span>
         <div class="contato-card-label">Email</div>
-        <div class="contato-card-value">Gilcelicheski@outlook.com</div>
+        <div class="contato-card-value">Gilcelicheslak@outlook.com</div>
       </a>
     </div>
   </div>
@@ -446,6 +496,12 @@ textarea.input { resize: vertical; font-family: inherit; }
   <div class="footer-orn">✦ ✦ ✦</div>
   <p>© 2025 Ateliê Gilceli Artes e Artesanato — feito com 🧡 à mão</p>
 </footer>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lightbox">
+  <button class="lightbox-close" id="lightboxClose">×</button>
+  <img id="lightboxImg" class="lightbox-img" src="" alt="Imagem ampliada">
+</div>
 
 <div id="cartModal" class="modal">
   <div class="modal-content">
@@ -511,7 +567,7 @@ textarea.input { resize: vertical; font-family: inherit; }
         <h4 class="admin-sub">Adicionar novo produto</h4>
         <input type="text" id="prodName" placeholder="Nome do produto" class="input">
         <input type="number" id="prodPrice" placeholder="Preço (ex: 25 ou 25.50)" step="0.01" min="0" class="input">
-        <input type="text" id="prodImage" placeholder="URL da imagem (opcional)" class="input">
+        <input type="text" id="prodImage" placeholder="URL da imagem (link direto .jpg)" class="input">
         <textarea id="prodDesc" placeholder="Descrição (opcional)" class="input" rows="2"></textarea>
         <button id="addProductBtn" class="btn-block">➕ Adicionar produto</button>
 
@@ -544,8 +600,8 @@ const CONFIG = {
   nomeLoja: "Ateliê Gilceli Artes e Artesanato",
   whatsappExibir: "(41) 98745-7979",
   whatsappNumero: "5541987457979",
-  instagram: "gilcelickeski",
-  email: "Gilcelicheski@outlook.com",
+  instagram: "gilcelicheslak",
+  email: "Gilcelicheslak@outlook.com",
   pixKey: "5541987457979",
   senhaAdmin: "gilceli2025"
 };
@@ -560,15 +616,7 @@ const REPO_FILE = "index.html";
 // =====================================================
 // 🛍️ PRODUTOS PUBLICADOS (o site atualiza essa lista automaticamente)
 // =====================================================
-const PRODUTOS_PUBLICADOS = [
-  {
-    "id": 1791165269114,
-    "nome": "Boneca",
-    "preco": 150,
-    "imagem": "https://i.ibb.co/7JqzBg1k/Whats-App-Image-2026-10-04-at-19-46-42.jpg",
-    "descricao": "Boneca Feminina"
-  }
-];
+const PRODUTOS_PUBLICADOS = [];
 
 // ==================== ESTADO ====================
 let produtos = [];
@@ -604,7 +652,7 @@ function renderProdutos() {
   grid.innerHTML = produtos.map(p => `
     <div class="menu-item">
       ${p.imagem 
-        ? `<img src="${p.imagem}" alt="${p.nome}" class="menu-item-img" onerror="this.outerHTML='<div class=\\'menu-item-img-placeholder\\'>🧶</div>'">`
+        ? `<img src="${p.imagem}" alt="${p.nome}" class="menu-item-img" onclick="abrirLightbox('${p.imagem}')" onerror="this.outerHTML='<div class=\\'menu-item-img-placeholder\\'>🧶</div>'">`
         : `<div class="menu-item-img-placeholder">🧶</div>`}
       <div class="menu-item-body">
         <div class="menu-item-head">
@@ -620,6 +668,20 @@ function renderProdutos() {
       </div>
     </div>
   `).join('');
+}
+
+// ==================== LIGHTBOX ====================
+function abrirLightbox(url) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  img.src = url;
+  lb.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 // ==================== CARRINHO ====================
@@ -733,7 +795,7 @@ function adicionarProduto() {
   document.getElementById('prodImage').value = '';
   document.getElementById('prodDesc').value = '';
 
-  document.getElementById('publishMsg').textContent = '⚠️ Clique em "Publicar no site" abaixo para atualizar o site.';
+  document.getElementById('publishMsg').textContent = '⚠️ Clique em "Publicar no site" abaixo para atualizar para todos.';
   document.getElementById('publishMsg').style.color = '#c9a961';
 }
 
@@ -743,7 +805,7 @@ function removerProduto(id) {
   salvarProdutosAdmin();
   renderProdutos();
   renderAdminList();
-  document.getElementById('publishMsg').textContent = '⚠️ Clique em "Publicar no site" para atualizar o site.';
+  document.getElementById('publishMsg').textContent = '⚠️ Clique em "Publicar no site" para atualizar para todos.';
   document.getElementById('publishMsg').style.color = '#c9a961';
 }
 
@@ -793,7 +855,7 @@ async function testarToken() {
       msg.style.color = '#4a8a3f';
     } else {
       const err = await resp.json().catch(() => ({}));
-      msg.textContent = `❌ Erro: ${err.message || resp.status}. Verifique se o token tem permissão de "Contents: Read and write" e se o repositório selecionado é o "${REPO_NAME}".`;
+      msg.textContent = `❌ Erro: ${err.message || resp.status}. Verifique se o token tem permissão de "Contents: Read and write" e se o repositório "${REPO_NAME}" está selecionado no token.`;
       msg.style.color = '#c0392b';
     }
   } catch (e) {
@@ -838,7 +900,6 @@ async function publicarNoSite() {
   msg.style.color = '#8a7565';
 
   try {
-    // 1. Buscar arquivo atual
     const getResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -855,7 +916,6 @@ async function publicarNoSite() {
     const sha = data.sha;
     const conteudoAtual = base64ToUtf8(data.content.replace(/\n/g, ''));
 
-    // 2. Substituir o array PRODUTOS_PUBLICADOS
     const regex = /const PRODUTOS_PUBLICADOS\s*=\s*\[[\s\S]*?\];/;
     if (!regex.test(conteudoAtual)) {
       throw new Error('Não encontrei a variável PRODUTOS_PUBLICADOS no arquivo. Certifique-se de usar a versão mais recente do index.html.');
@@ -865,7 +925,6 @@ async function publicarNoSite() {
     const novoArray = `const PRODUTOS_PUBLICADOS = ${produtosJSON};`;
     const novoConteudo = conteudoAtual.replace(regex, novoArray);
 
-    // 3. Enviar arquivo atualizado
     const putResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE}`, {
       method: 'PUT',
       headers: {
@@ -887,7 +946,7 @@ async function publicarNoSite() {
 
     msg.textContent = '✅ Publicado! Em 1-2 minutos o site estará atualizado para todos.';
     msg.style.color = '#4a8a3f';
-    alert('✅ Produtos publicados com sucesso!\n\nEm 1-2 minutos o site estará atualizado para todas as pessoas que visitarem.');
+    alert('✅ Produtos publicados com sucesso!\n\nEm 1-2 minutos o site estará atualizado para todas as pessoas que visitarem.\n\nPara ver em outro celular, espere 2 min e force atualizar (Ctrl+Shift+R ou limpe o cache).');
   } catch (e) {
     msg.textContent = `❌ Erro: ${e.message}`;
     msg.style.color = '#c0392b';
@@ -927,6 +986,12 @@ function setupEventos() {
     renderCarrinho();
     atualizarContadorCarrinho();
     fecharModal('paymentModal');
+  };
+
+  // Lightbox
+  document.getElementById('lightboxClose').onclick = fecharLightbox;
+  document.getElementById('lightbox').onclick = (e) => {
+    if (e.target.id === 'lightbox' || e.target.id === 'lightboxClose') fecharLightbox();
   };
 
   document.getElementById('adminBtn').onclick = () => {
@@ -979,6 +1044,7 @@ window.addAoCarrinho = addAoCarrinho;
 window.alterarQtd = alterarQtd;
 window.removerDoCarrinho = removerDoCarrinho;
 window.removerProduto = removerProduto;
+window.abrirLightbox = abrirLightbox;
 </script>
 </body>
 </html>
